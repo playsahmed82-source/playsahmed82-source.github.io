@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AuraXStore - Gaming Accounts, Items, Giftcards & Topups</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  :root{
+    --bg:#0a0a1a; --bg2:#12122b; --purple:#9b4dff; --cyan:#27d3ff;
+    --card:#16162e; --text:#e8e8ff; --muted:#9a9ac4;
+  }
+  body{ background:var(--bg); color:var(--text); overflow-x:hidden; }
+
+  /* ===== Animated background ===== */
+  .bg-anim{ position:fixed; inset:0; z-index:-1; overflow:hidden; }
+  .blob{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.45; animation:float 14s ease-in-out infinite; }
+  .b1{ width:380px;height:380px; background:var(--purple); top:-80px; left:-60px; }
+  .b2{ width:320px;height:320px; background:var(--cyan); bottom:-60px; right:-40px; animation-delay:-5s; }
+  .b3{ width:280px;height:280px; background:#ff4dff; top:40%; left:50%; animation-delay:-9s; }
+  @keyframes float{ 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.15);} }
+
+  /* ===== Navbar ===== */
+  header{ position:sticky; top:0; z-index:100; display:flex; justify-content:space-between; align-items:center;
+    padding:14px 6%; background:rgba(10,10,26,.75); backdrop-filter:blur(12px); border-bottom:1px solid rgba(155,77,255,.25);}
+  .logo{ display:flex; align-items:center; gap:10px; font-size:1.5rem; font-weight:800; letter-spacing:1px;}
+  .logo span{ background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .logo .x{ color:var(--cyan); }
+  nav a{ color:var(--text); text-decoration:none; margin:0 12px; font-weight:500; transition:.3s;}
+  nav a:hover{ color:var(--cyan); }
+  .cart-btn{ background:linear-gradient(90deg,var(--purple),var(--cyan)); border:none; color:#fff; padding:10px 18px;
+    border-radius:30px; font-weight:600; cursor:pointer; transition:.3s; position:relative;}
+  .cart-btn:hover{ transform:scale(1.06); box-shadow:0 0 20px rgba(39,211,255,.6);}
+  .cart-count{ position:absolute; top:-8px; right:-8px; background:#ff4d6d; font-size:.7rem; width:20px; height:20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;}
+
+  /* ===== Hero ===== */
+  .hero{ text-align:center; padding:90px 6% 70px; }
+  .hero h1{ font-size:3.2rem; line-height:1.15; margin-bottom:18px; animation:fadeUp 1s ease;}
+  .hero h1 span{ background:linear-gradient(90deg,var(--purple),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero p{ color:var(--muted); font-size:1.15rem; max-width:620px; margin:0 auto 30px; animation:fadeUp 1.3s ease;}
+  .hero .btns a{ display:inline-block; margin:8px; padding:14px 30px; border-radius:30px; text-decoration:none; font-weight:600; transition:.3s;}
+  .btn-primary{ background:linear-gradient(90deg,var(--purple),var(--cyan)); color:#fff;}
+  .btn-primary:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(155,77,255,.5);}
+  .btn-ghost{ border:2px solid var(--purple); color:var(--text);}
+  .btn-ghost:hover{ background:var(--purple); }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ===== Categories ===== */
+  .section{ padding:60px 6%; }
+  .section h2{ text-align:center; font-size:2.2rem; margin-bottom:10px;}
+  .section h2 span{ color:var(--cyan);}
+  .section .sub{ text-align:center; color:var(--muted); margin-bottom:40px;}
+  .cats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px;}
+  .cat{ background:var(--card); border:1px solid rgba(155,77,255,.2); border-radius:16px; padding:30px 20px; text-align:center;
+    cursor:pointer; transition:.35s; }
+  .cat:hover{ transform:translateY(-8px); border-color:var(--cyan); box-shadow:0 12px 30px rgba(39,211,255,.25);}
+  .cat .ico{ font-size:2.5rem; margin-bottom:12px;}
+  .cat h3{ font-size:1.2rem; margin-bottom:6px;}
+  .cat p{ color:var(--muted); font-size:.9rem;}
+
+  /* ===== Products ===== */
+  .filters{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:30px;}
+  .filters button{ background:var(--card); color:var(--text); border:1px solid rgba(155,77,255,.3); padding:8px 18px;
+    border-radius:20px; cursor:pointer; transition:.3s; font-weight:500;}
+  .filters button.active, .filters button:hover{ background:linear-gradient(90deg,var(--purple),var(--cyan)); border:none; }
+  .products{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:22px;}
+  .product{ background:var(--card); border:1px solid rgba(155,77,255,.2); border-radius:16px; overflow:hidden; transition:.35s; animation:fadeUp .6s ease;}
+  .product:hover{ transform:translateY(-6px); box-shadow:0 12px 30px rgba(155,77,255,.3);}
+  .product .img{ height:150px; display:flex; align-items:center; justify-content:center; font-size:3.5rem;
+    background:linear-gradient(135deg,rgba(155,77,255,.25),rgba(39,211,255,.25));}
+  .product .info{ padding:16px;}
+  .product .tag{ font-size:.7rem; color:var(--cyan); text-transform:uppercase; letter-spacing:1px;}
+  .product h4{ margin:6px 0; font-size:1.05rem;}
+  .product .price{ font-size:1.3rem; font-weight:800; color:var(--cyan); margin:8px 0;}
+  .product button{ width:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); border:none; color:#fff;
+    padding:10px; border-radius:10px; cursor:pointer; font-weight:600; transition:.3s;}
+  .product button:hover{ filter:brightness(1.15); }
+
+  /* ===== Why us ===== */
+  .features{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px;}
+  .feature{ text-align:center; padding:25px; background:var(--card); border-radius:14px; transition:.3s;}
+  .feature:hover{ transform:scale(1.04);}
+  .feature .ico{ font-size:2.2rem; margin-bottom:10px;}
+
+  /* ===== Cart drawer ===== */
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:.3s; z-index:200;}
+  .overlay.open{ opacity:1; pointer-events:all;}
+  .drawer{ position:fixed; top:0; right:-420px; width:380px; max-width:90%; height:100%; background:var(--bg2);
+    z-index:300; padding:24px; transition:.4s; box-shadow:-10px 0 40px rgba(0,0,0,.5); overflow-y:auto;}
+  .drawer.open{ right:0; }
+  .drawer h3{ margin-bottom:20px; display:flex; justify-content:space-between;}
+  .drawer .close{ cursor:pointer; color:var(--muted);}
+  .cart-item{ display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(155,77,255,.15);}
+  .cart-item small{ color:var(--muted);}
+  .cart-item .rm{ color:#ff4d6d; cursor:pointer; font-size:.85rem;}
+  .total{ margin:20px 0; font-size:1.3rem; font-weight:800;}
+  .checkout{ width:100%; background:linear-gradient(90deg,var(--purple),var(--cyan)); border:none; color:#fff;
+    padding:14px; border-radius:12px; font-weight:700; cursor:pointer; font-size:1rem; transition:.3s;}
+  .checkout:hover{ box-shadow:0 0 25px rgba(39,211,255,.5);}
+  .empty{ color:var(--muted); text-align:center; padding:30px 0;}
+
+  /* ===== Footer ===== */
+  footer{ background:var(--bg2); padding:40px 6%; text-align:center; margin-top:40px; border-top:1px solid rgba(155,77,255,.2);}
+  footer .soon{ display:inline-block; margin-top:10px; background:rgba(155,77,255,.15); color:var(--cyan);
+    padding:6px 16px; border-radius:20px; font-size:.85rem;}
+
+  /* toast */
+  .toast{ position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:linear-gradient(90deg,var(--purple),var(--cyan));
+    color:#fff; padding:14px 26px; border-radius:30px; font-weight:600; z-index:400; opacity:0; transition:.4s;}
+  .toast.show{ transform:translateX(-50%) translateY(0); opacity:1;}
+
+  @media(max-width:600px){ .hero h1{font-size:2.2rem;} nav{display:none;} }
+</style>
+</head>
+<body>
+
+<div class="bg-anim">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+</div>
+
+<!-- NAVBAR -->
+<header>
+  <div class="logo">🎮 <span>AURA<span class="x">X</span>STORE</span></div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#cats">Categories</a>
+    <a href="#shop">Shop</a>
+    <a href="#why">Why Us</a>
+  </nav>
+  <button class="cart-btn" onclick="openCart()">🛒 Cart <span class="cart-count" id="cartCount">0</span></button>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <h1>Buy Premium <span>Gaming Accounts</span><br>Items, Giftcards & Topups</h1>
+  <p>Instant delivery, 100% secure payments and trusted service. Level up your game with AuraXStore today!</p>
+  <div class="btns">
+    <a href="#shop" class="btn-primary">Browse Products</a>
+    <a href="#cats" class="btn-ghost">View Categories</a>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" id="cats">
+  <h2>Our <span>Categories</span></h2>
+  <p class="sub">Everything a gamer needs in one place</p>
+  <div class="cats">
+    <div class="cat" onclick="filterCat('account')"><div class="ico">👤</div><h3>Game Accounts</h3><p>Verified premium accounts</p></div>
+    <div class="cat" onclick="filterCat('item')"><div class="ico">⚔️</div><h3>Game Items</h3><p>Skins, weapons & gear</p></div>
+    <div class="cat" onclick="filterCat('service')"><div class="ico">🛠️</div><h3>Services</h3><p>Boosting & power leveling</p></div>
+    <div class="cat" onclick="filterCat('giftcard')"><div class="ico">🎁</div><h3>Giftcards</h3><p>All major platforms</p></div>
+    <div class="cat" onclick="filterCat('topup')"><div class="ico">💎</div><h3>Topups</h3><p>Instant in-game currency</p></div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="section" id="shop">
+  <h2>Featured <span>Products</span></h2>
+  <p class="sub">Buy now — instant & secure</p>
+  <div class="filters" id="filters">
+    <button class="active" onclick="filterCat('all',this)">All</button>
+    <button onclick="filterCat('account',this)">Accounts</button>
+    <button onclick="filterCat('item',this)">Items</button>
+    <button onclick="filterCat('service',this)">Services</button>
+    <button onclick="filterCat('giftcard',this)">Giftcards</button>
+    <button onclick="filterCat('topup',this)">Topups</button>
+  </div>
+  <div class="products" id="productGrid"></div>
+</section>
+
+<!-- WHY US -->
+<section class="section" id="why">
+  <h2>Why <span>AuraXStore?</span></h2>
+  <p class="sub">Trusted by thousands of gamers</p>
+  <div class="features">
+    <div class="feature"><div class="ico">⚡</div><h3>Instant Delivery</h3><p>Get your order in minutes</p></div>
+    <div class="feature"><div class="ico">🔒</div><h3>Secure Payments</h3><p>Encrypted & protected</p></div>
+    <div class="feature"><div class="ico">💬</div><h3>24/7 Support</h3><p>Always here to help</p></div>
+    <div class="feature"><div class="ico">⭐</div><h3>Trusted Service</h3><p>5-star rated store</p></div>
+  </div>
+</section>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <h3>Your Cart <span class="close" onclick="closeCart()">✕</span></h3>
+  <div id="cartItems"></div>
+  <div class="total">Total: $<span id="cartTotal">0.00</span></div>
+  <button class="checkout" onclick="checkout()">Proceed to Checkout</button>
+</div>
+
+<div class="toast" id="toast">Added to cart!</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo" style="justify-content:center;">🎮 <span>AURA<span class="x">X</span>STORE</span></div>
+  <p style="color:var(--muted); margin-top:10px;">© 2025 AuraXStore. All rights reserved.</p>
+  <div class="soon">🚀 Selling Option Coming Soon!</div>
+</footer>
+
+<script>
+/* ====== PRODUCTS DATA (apni products yahan edit karo) ====== */
+const products = [
+  {id:1, name:"Valorant Radiant Account", cat:"account", price:89.99, icon:"🎯", tag:"Account"},
+  {id:2, name:"PUBG Mobile Conqueror ID", cat:"account", price:120.00, icon:"🔫", tag:"Account"},
+  {id:3, name:"Genshin Impact AR60 Acc", cat:"account", price:75.50, icon:"⚔️", tag:"Account"},
+  {id:4, name:"CS2 Knife Skin (Karambit)", cat:"item", price:45.00, icon:"🔪", tag:"Item"},
+  {id:5, name:"Fortnite Rare Skin Bundle", cat:"item", price:30.00, icon:"🎨", tag:"Item"},
+  {id:6, name:"Rank Boosting Service", cat:"service", price:25.00, icon:"📈", tag:"Service"},
+  {id:7, name:"Power Leveling (10 hrs)", cat:"service", price:40.00, icon:"🛠️", tag:"Service"},
+  {id:8, name:"Steam Giftcard $50", cat:"giftcard", price:50.00, icon:"🎁", tag:"Giftcard"},
+  {id:9, name:"Google Play $25 Card", cat:"giftcard", price:25.00, icon:"🪙", tag:"Giftcard"},
+  {id:10, name:"PUBG UC 1800 Topup", cat:"topup", price:19.99, icon:"💎", tag:"Topup"},
+  {id:11, name:"Mobile Legends Diamonds", cat:"topup", price:9.99, icon:"💠", tag:"Topup"},
+  {id:12, name:"Free Fire Diamonds 1080", cat:"topup", price:11.50, icon:"🔥", tag:"Topup"},
+];
+
+let cart = [];
+
+function renderProducts(filter="all"){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = "";
+  products.filter(p => filter==="all" || p.cat===filter).forEach(p=>{
+    grid.innerHTML += `
+      <div class="product">
+        <div class="img">${p.icon}</div>
+        <div class="info">
+          <div class="tag">${p.tag}</div>
+          <h4>${p.name}</h4>
+          <div class="price">$${p.price.toFixed(2)}</div>
+          <button onclick="addToCart(${p.id})">🛒 Add to Cart</button>
+        </div>
+      </div>`;
+  });
+}
+
+function filterCat(cat, btn){
+  renderProducts(cat);
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+}
+
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  const exist = cart.find(x=>x.id===id);
+  if(exist){ exist.qty++; } else { cart.push({...p, qty:1}); }
+  updateCart();
+  showToast(p.name + " added!");
+}
+
+function removeFromCart(id){ cart = cart.filter(x=>x.id!==id); updateCart(); }
+
+function updateCart(){
+  document.getElementById('cartCount').innerText = cart.reduce((s,i)=>s+i.qty,0);
+  const box = document.getElementById('cartItems');
+  if(cart.length===0){ box.innerHTML = '<div class="empty">🛒 Your cart is empty</div>'; }
+  else {
+    box.innerHTML = cart.map(i=>`
+      <div class="cart-item">
+        <div>${i.icon} ${i.name}<br><small>$${i.price.toFixed(2)} × ${i.qty}</small></div>
+        <div style="text-align:right;">$${(i.price*i.qty).toFixed(2)}<br>
+        <span class="rm" onclick="removeFromCart(${i.id})">Remove</span></div>
+      </div>`).join('');
+  }
+  document.getElementById('cartTotal').innerText =
+    cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
+}
+
+function openCart(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+function closeCart(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+function checkout(){
+  if(cart.length===0){ showToast("Cart is empty!"); return; }
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
+  /* ===== PAYMENT GATEWAY YAHAN LAGAO ===== */
+  alert("Redirecting to payment gateway...\nTotal: $"+total+"\n\n(Yahan apna payment gateway link/code lagao)");
+  // window.location.href = "https://your-payment-gateway.com/pay?amount="+total;
+}
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+renderProducts();
+updateCart();
+</script>
+</body>
+</html>
